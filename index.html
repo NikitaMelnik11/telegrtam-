@@ -4,53 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News/Crypto/Forex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="images/x-icon"
-    href="https://cdn4.iconfinder.com/data/icons/digital-marketing-117/64/Digital_Marketing_1-24-256.png">
+    href="https://cdn1.iconfinder.com/data/icons/business-700/48/Candle_Sticks-256.png">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
             min-height: 100vh;
+            background: #000;
             overflow-x: hidden;
-            position: relative;
+        }
+
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader span {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            margin: 0 5px;
+            animation: bounce 0.5s alternate infinite;
+        }
+
+        .loader span:nth-child(2) { animation-delay: 0.1s; }
+        .loader span:nth-child(3) { animation-delay: 0.2s; }
+
+        @keyframes bounce {
+            to { transform: translateY(-20px); }
         }
 
         .video-background {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            background: #000;
-        }
-
-        .video-background video {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            right: 0;
+            bottom: 0;
             min-width: 100%;
             min-height: 100%;
             width: auto;
             height: auto;
-            object-fit: cover;
-        }
-
-        .video-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
             z-index: -1;
+            filter: brightness(0.3);
         }
 
         .container {
@@ -60,40 +75,60 @@
             position: relative;
         }
 
-        h1 {
-            color: #ffffff;
+        .title-container {
             text-align: center;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .title {
+            color: white;
             font-size: 3rem;
-            margin-bottom: 3rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #fff, #a8edea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(168, 237, 234, 0.5);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
+            font-weight: 300;
         }
 
         .top-cards {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin-bottom: 4rem;
         }
 
         .regular-cards {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
         }
 
         .card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .card-image {
             width: 100%;
             height: 200px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
             overflow: hidden;
             position: relative;
         }
@@ -102,24 +137,39 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.5s ease;
         }
 
         .card:hover .card-image img {
             transform: scale(1.1);
         }
 
-        .card-content {
-            padding: 1.5rem;
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at var(--mouse-x, 0) var(--mouse-y, 0),
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 50%
+            );
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .top-card {
             background: rgba(255, 255, 255, 0.15);
             transform: translateY(-10px);
-            position: relative;
         }
 
-        .top-card::before {
+        .top-card::after {
             content: '';
             position: absolute;
             top: 0;
@@ -127,292 +177,377 @@
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6c5ce7);
+            animation: gradient 3s linear infinite;
+            background-size: 200% 100%;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .card h2 {
-            color: #ffffff;
+        .top-card:hover {
+            transform: translateY(-15px) scale(1.02);
+        }
+
+        .card h3 {
+            color: white;
             margin-bottom: 1rem;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            position: relative;
         }
 
         .card p {
             color: rgba(255, 255, 255, 0.8);
-            line-height: 1.6;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            font-weight: 300;
         }
 
-        .top-label {
+        .badge {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: #ff6b6b;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: linear-gradient(45deg, #ffd93d, #ff6b6b);
+            color: #000;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(255, 217, 61, 0.3);
+            animation: pulse 2s infinite;
             z-index: 1;
         }
 
-        @media (max-width: 1200px) {
-            .regular-cards {
-                grid-template-columns: repeat(3, 1fr);
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        @media (max-width: 900px) {
-            .top-cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .regular-cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .scroll-indicator {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 2rem;
+            animation: bounce 1s infinite;
+            opacity: 0.7;
+            cursor: pointer;
+            z-index: 100;
         }
 
-        @media (max-width: 600px) {
-            .top-cards,
-            .regular-cards {
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+
+            .top-cards, .regular-cards {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
-            h1 {
-                font-size: 2rem;
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .card-image {
+                height: 180px;
+            }
+
+            .card h3 {
+                font-size: 1.5rem;
+            }
+
+            .card p {
+                font-size: 1rem;
+            }
+
+            .badge {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: opacity 0.5s ease, transform 0.5s ease;
+            }
+
+            .card.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (hover: none) {
+            .card:active {
+                transform: scale(0.98);
+                transition: transform 0.2s;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .video-background {
+                display: none;
+            }
+
+            body {
+                background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
             }
         }
     </style>
 </head>
 <body>
-    <div class="video-background">
-        <video id="bgVideo" playsinline autoplay muted loop preload="auto">
-            <source src="YOUR_VIDEO_URL_HERE.webm" type="video/webm">
-            <source src="https://cdn.pixabay.com/video/2021/02/11/64917-511355333_large.mp4" type="video/mp4">
-        </video>
+    <div class="loader">
+        <span></span>
+        <span></span>
+        <span></span>
     </div>
-    <div class="video-overlay"></div>
+
+    <video autoplay muted loop class="video-background" playsinline>
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-heights-in-a-sunset-26070-large.mp4" type="video/mp4">
+    </video>
 
     <div class="container">
-        <h1>News/Crypto/Forex</h1>
+        <div class="title-container">
+            <h1 class="title">News.forex</h1>
+            <p class="subtitle">сайт про новости форекс</p>
+        </div>
         
         <div class="top-cards">
             <div class="card top-card">
-                <span class="top-label">TOP 1</span>
+                <span class="badge">TOP 1</span>
                 <div class="card-image">
-                    <img src="https://cdn.pixabay.com/photo/2018/08/19/11/08/port-3616350_1280.jpg" alt="Premium Card Image">
+                    <img src="https://cdn.pixabay.com/photo/2023/03/28/01/10/money-7881948_1280.jpg" alt="Premium Experience">
                 </div>
-                <div class="card-content">
-                    <h2>Трамп угрожает Китаю: новые тарифы вступят в силу 1 февраля</h2>
-                    <p>Президент Дональд Трамп во вторник предупредил о возможности введения новых тарифов уже на следующей неделе. На этот раз целью стал Китай: Трамп пригрозил наложить более высокие налоги на импорт из второго по величине торгового партнёра Америки.
+                <h3>Wells Fargo прогнозирует курсы USD/MXN и USD/CAD на фоне угрозы введения тарифов</h3>
+                <p>Аналитики Wells Fargo представили свое видение потенциального влияния американских тарифов на Канаду и Мексику, прогнозируя укрепление доллара США в результате. Фирма предполагает, что если Соединенные Штаты введут 25% тариф на своих североамериканских торговых партнеров, это не только повлияет на мексиканское песо и канадский доллар, но и приведет к широкомасштабному укреплению доллара США.</p>
+            </div>
+            <div class="card top-card">
+                <span class="badge">TOP 2</span>
+                <div class="card-image">
+                    <img src="https://cdn.pixabay.com/photo/2016/11/23/14/37/blur-1853262_1280.jpg" alt="Elite Selection">
+                </div>
+                <h3>Ставки на рост доллара достигли максимума с 2016 года — Reuters</h3>
+                <p>Рост курса доллара наблюдается с конца сентября, когда инвесторы стали прогнозировать улучшение ситуации в американской экономике, победу Дональда Трампа на президентских выборах США и более длительный период высоких процентных ставок в стране.</p>
+            </div>
+            <div class="card top-card">
+                <span class="badge">TOP 3</span>
+                <div class="card-image">
+                    <img src="https://cdn.pixabay.com/photo/2021/05/27/02/07/gamestop-6286877_960_720.jpg" alt="Exclusive Access">
+                </div>
+                <h3>Канадский доллар и мексиканское песо под угрозой дальнейшего обесценивания по отношению к доллару США - аналитик</h3>
+                <p>По словам Пезоле, рынок еще не полностью учел потенциальное влияние таких существенных тарифов на канадские товары, что указывает на возможность дополнительного снижения курса канадского доллара. Он ожидает, что курс USD/CAD в ближайшее время может подняться выше отметки 1,45.
 
-                        На пресс-конференции в Овальном кабинете, где он повторил свои аналогичные заявления, сделанные в понедельник, Трамп заявил, что рассматривает введение 10%-го общего тарифа на все китайские товары, начиная с 1 февраля.
-                        
-                        Ранее, в понедельник, президент пригрозил ввести 25%-е тарифы на импорт из Мексики и Канады, но уклонился от обсуждения Китая, отметив, что экс-президент Джо Байден оставил в силе обширные тарифы, которые Трамп</p>
-                </div>
-            </div>
-            <div class="card top-card">
-                <span class="top-label">TOP 2</span>
-                <div class="card-image">
-                    <img src="https://cdn.pixabay.com/photo/2023/03/28/01/10/money-7881948_1280.jpg" alt="Elite Selection Image">
-                </div>
-                <div class="card-content">
-                    <h2>Wells Fargo прогнозирует курсы USD/MXN и USD/CAD на фоне угрозы введения тарифов</h2>
-                    <p>Аналитики Wells Fargo представили свое видение потенциального влияния американских тарифов на Канаду и Мексику, прогнозируя укрепление доллара США в результате. Фирма предполагает, что если Соединенные Штаты введут 25% тариф на своих североамериканских торговых партнеров, это не только повлияет на мексиканское песо и канадский доллар, но и приведет к широкомасштабному укреплению доллара США.<p>
-                </div>
-            </div>
-            <div class="card top-card">
-                <span class="top-label">TOP 3</span>
-                <div class="card-image">
-                    <img src="https://cdn.pixabay.com/photo/2016/11/23/14/37/blur-1853262_1280.jpg" alt="Special Edition Image">
-                </div>
-                <div class="card-content">
-                    <h2>Ставки на рост доллара достигли максимума с 2016 года — Reuters</h2>
-                    <p>Рост курса доллара наблюдается с конца сентября, когда инвесторы стали прогнозировать улучшение ситуации в американской экономике, победу Дональда Трампа на президентских выборах США и более длительный период высоких процентных ставок в стране.</p>
-                </div>
+                    Согласно данным FactSet, курс USD/CAD вырос на 0,9% до 1,4442, достигнув ранее многолетнего максимума в 1,4512. Аналогично, курс USD/MXN поднялся на 0,8% до 20,656</p>
             </div>
         </div>
 
         <div class="regular-cards">
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,1" alt="Card 4 Image">
+                    <img src="https://images.unsplash.com/photo-1449247709967-d4461a6a6103?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80" alt="Luxury Suite">
                 </div>
-                <div class="card-content">
-                    <h2>Card 4</h2>
-                    <p>Explore our amazing collection of premium items.</p>
-                </div>
+                <h3>Luxury Suite</h3>
+                <p>Experience ultimate comfort and elegance in our premium collection.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,2" alt="Card 5 Image">
+                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Premium Design">
                 </div>
-                <div class="card-content">
-                    <h2>Card 5</h2>
-                    <p>Discover unique items in our carefully curated selection.</p>
-                </div>
+                <h3>Premium Design</h3>
+                <p>Discover the perfect blend of style and sophistication.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,3" alt="Card 6 Image">
+                    <img src="https://images.unsplash.com/photo-1449247709967-d4461a6a6103?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80" alt="Elite Collection">
                 </div>
-                <div class="card-content">
-                    <h2>Card 6</h2>
-                    <p>Find the perfect item for your collection today.</p>
-                </div>
+                <h3>Elite Collection</h3>
+                <p>Explore our handpicked selection of premium items.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,4" alt="Card 7 Image">
+                    <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Signature Series">
                 </div>
-                <div class="card-content">
-                    <h2>Card 7</h2>
-                    <p>Experience luxury with our premium selection.</p>
-                </div>
+                <h3>Signature Series</h3>
+                <p>Experience excellence with our signature collection.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,5" alt="Card 8 Image">
+                    <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80" alt="Premium Access">
                 </div>
-                <div class="card-content">
-                    <h2>Card 8</h2>
-                    <p>Exclusive items for discerning collectors.</p>
-                </div>
+                <h3>Premium Access</h3>
+                <p>Unlock exclusive benefits and special features.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,6" alt="Card 9 Image">
+                    <img src="https://images.unsplash.com/photo-1449247709967-d4461a6a6103?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80" alt="VIP Experience">
                 </div>
-                <div class="card-content">
-                    <h2>Card 9</h2>
-                    <p>Premium quality items at exceptional value.</p>
-                </div>
+                <h3>VIP Experience</h3>
+                <p>Enjoy premium service and personalized attention.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,7" alt="Card 10 Image">
+                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Luxury Edition">
                 </div>
-                <div class="card-content">
-                    <h2>Card 10</h2>
-                    <p>Discover the latest additions to our collection.</p>
-                </div>
+                <h3>Luxury Edition</h3>
+                <p>Discover our limited edition premium items.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,8" alt="Card 11 Image">
+                    <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Elite Status">
                 </div>
-                <div class="card-content">
-                    <h2>Card 11</h2>
-                    <p>Explore our featured items of the month.</p>
-                </div>
+                <h3>Elite Status</h3>
+                <p>Join our exclusive community of premium members.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,9" alt="Card 12 Image">
+                    <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80" alt="Premium Quality">
                 </div>
-                <div class="card-content">
-                    <h2>Card 12</h2>
-                    <p>Find rare and unique pieces in our selection.</p>
-                </div>
+                <h3>Premium Quality</h3>
+                <p>Experience unmatched quality and craftsmanship.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,10" alt="Card 13 Image">
+                    <img src="https://images.unsplash.com/photo-1449247709967-d4461a6a6103?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1771&q=80" alt="Exclusive Offers">
                 </div>
-                <div class="card-content">
-                    <h2>Card 13</h2>
-                    <p>Premium items for the distinguished collector.</p>
-                </div>
+                <h3>Exclusive Offers</h3>
+                <p>Access special deals and premium promotions.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,11" alt="Card 14 Image">
+                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Premium Support">
                 </div>
-                <div class="card-content">
-                    <h2>Card 14</h2>
-                    <p>Exclusive deals on premium selections.</p>
-                </div>
+                <h3>Premium Support</h3>
+                <p>Get dedicated assistance and priority service.</p>
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="https://source.unsplash.com/800x600/?product,12" alt="Card 15 Image">
+                    <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" alt="Elite Benefits">
                 </div>
-                <div class="card-content">
-                    <h2>Card 15</h2>
-                    <p>Special items from our curated collection.</p>
-                </div>
+                <h3>Elite Benefits</h3>
+                <p>Enjoy exclusive perks and premium advantages.</p>
             </div>
         </div>
     </div>
 
+    <div class="scroll-indicator">↓</div>
+
     <script>
+        // Загрузка анимации
+        window.addEventListener('load', () => {
+            const loader = document.querySelector('.loader');
+            loader.classList.add('hidden');
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('bgVideo');
-            
-            // Оптимизация воспроизведения видео
-            video.addEventListener('loadeddata', function() {
-                video.play().catch(function(error) {
-                    console.log("Автовоспроизведение отключено:", error);
-                    video.muted = true;
-                    video.play();
-                });
-            });
-
-            // Оптимизация для мобильных устройств
-            function checkMobile() {
-                if (window.innerWidth <= 768) {
-                    video.setAttribute('playsinline', '');
-                    video.setAttribute('webkit-playsinline', '');
-                }
-            }
-
-            window.addEventListener('resize', checkMobile);
-            checkMobile();
-
-            // Анимация появления карточек
+            // Наблюдатель пересечений для карточек
             const cards = document.querySelectorAll('.card');
             
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = entry.target.classList.contains('top-card') 
-                            ? 'translateY(-10px)' 
-                            : 'translateY(0)';
+                        entry.target.classList.add('visible');
+                        // Добавляем задержку для каскадной анимации
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, entry.target.dataset.delay || 0);
                     }
                 });
             }, {
-                threshold: 0.1
+                threshold: 0.1,
+                rootMargin: '20px'
             });
 
-            cards.forEach(card => {
+            // Добавляем задержку для каждой карточки
+            cards.forEach((card, index) => {
+                card.dataset.delay = index * 100;
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
                 observer.observe(card);
             });
 
-            // Предзагрузка изображений
-            function preloadImages() {
-                const images = document.querySelectorAll('img');
-                images.forEach(img => {
-                    const src = img.getAttribute('src');
-                    if (src) {
-                        const image = new Image();
-                        image.src = src;
-                    }
-                });
-            }
+            // Эффект при наведении для карточек
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
 
-            preloadImages();
-
-            // Обработка ошибок загрузки изображений
-            document.querySelectorAll('img').forEach(img => {
-                img.addEventListener('error', function() {
-                    this.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
                 });
             });
+
+            // Индикатор прокрутки
+            const scrollIndicator = document.querySelector('.scroll-indicator');
+            let lastScrollTop = 0;
+
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop) {
+                    scrollIndicator.style.opacity = '0';
+                } else {
+                    scrollIndicator.style.opacity = '0.7';
+                }
+                
+                if (scrollTop === 0) {
+                    scrollIndicator.style.opacity = '0.7';
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+
+            scrollIndicator.addEventListener('click', () => {
+                window.scrollTo({
+                    top: window.innerHeight,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Оптимизация для сенсорных устройств
+            if ('ontouchstart' in window) {
+                document.body.classList.add('touch-device');
+            }
         });
+
+        // Оптимизация производительности для мобильных устройств
+        if (window.matchMedia('(max-width: 768px)').matches) {
+            const video = document.querySelector('.video-background');
+            if (video) {
+                video.remove();
+            }
+        }
     </script>
 </body>
 </html>
